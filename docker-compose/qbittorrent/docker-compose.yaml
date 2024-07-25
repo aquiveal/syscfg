@@ -11,4 +11,4 @@ services:
         volumes:
             - /DATA/AppData/qbittorrent/config:/config
             - /DATA/Downloads:/downloads
-        image: ghcr.io/hotio/qbittorrent:release-4.6.2
+        image: ghcr.io/hotio/qbittorrent:latest
