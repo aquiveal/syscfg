@@ -1,0 +1,14 @@
+[Unit]
+Description=Mount Google Cloud Storage bucket media-etge-bucket to /mnt/Media
+After=network-online.target
+RequiresMountsFor=/mnt/AppData/gcsfuse
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Add a loop to check for the existence of the directory
+ExecStart=/bin/bash -c 'while [ ! -d /DATA/AppData/gcsfuse ]; do sleep 1; done; /usr/bin/gcsfuse -o allow_other --limit-ops-per-sec -1 --dir-mode 777 --file-mode 777 --gid 1000 --uid 1000 --implicit-dirs  --key-file /DATA/AppData/gcsfuse/key/homelab-301-pve-567093e3d8c6.json media-dgeg-bucket /mnt/Media'
+ExecStop=/usr/bin/fusermount -uz /mnt/Media
+
+[Install]
+WantedBy=multi-user.target

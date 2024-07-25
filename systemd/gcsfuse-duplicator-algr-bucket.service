@@ -1,0 +1,14 @@
+[Unit]
+Description=Mount Google Cloud Storage bucket duplicator-algr-bucket to /mnt/Buckets/duplicator-algr-bucket
+After=network-online.target
+RequiresMountsFor=/mnt/AppData/gcsfuse
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Add a loop to check for the existence of the directory
+ExecStart=/bin/bash -c 'while [ ! -d /DATA/AppData/gcsfuse ]; do sleep 1; done; /usr/bin/gcsfuse -o allow_other --limit-ops-per-sec -1 --dir-mode 777 --file-mode 777 --gid 1000 --uid 1000 --implicit-dirs  --key-file /DATA/AppData/gcsfuse/key/cabbery-general-thr1-5141d1c547d1.json --config-file /DATA/AppData/gcsfuse/config/config.yaml duplicator-algr-bucket /mnt/Buckets/duplicator-algr-bucket'
+ExecStop=/usr/bin/fusermount -uz /mnt/Buckets/duplicator-algr-bucket
+
+[Install]
+WantedBy=multi-user.target
