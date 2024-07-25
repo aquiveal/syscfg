@@ -3,7 +3,7 @@ services:
   nginxproxymanager:
     container_name: nginxproxymanager
     hostname: nginxproxymanager
-    image: jc21/nginx-proxy-manager:2.11.2
+    image: jc21/nginx-proxy-manager:latest
     labels:
       icon: https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/NginxProxyManager/icon.png
     ports:
