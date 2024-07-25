@@ -1,5 +1,5 @@
 # Media
-@reboot gcsfuse -o allow_other --limit-ops-per-sec -1 --dir-mode 777 --file-mode 777 --gid 1000 --uid 1000 --implicit-dirs  media-dgeg-bucket /mnt/Media
+@reboot gcsfuse -o allow_other --limit-ops-per-sec -1 --dir-mode 777 --file-mode 777 --gid 1000 --uid 1000 --implicit-dirs  media-dgeg-bucket /DATA/Media
 
 # Backups
-@reboot gcsfuse -o allow_other --limit-ops-per-sec -1 --dir-mode 777 --file-mode 777 --gid 1000 --uid 1000 --implicit-dirs appdata-revi-bucket /mnt/Backups
+@reboot gcsfuse -o allow_other --limit-ops-per-sec -1 --dir-mode 777 --file-mode 777 --gid 1000 --uid 1000 --implicit-dirs appdata-revi-bucket /DATA/Backups
