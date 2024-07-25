@@ -1,0 +1,17 @@
+name: cloudflared
+services:
+  cloudflared:
+    container_name: cloudflared
+    hostname: cloudflared
+    image: wisdomsky/cloudflared-web:latest
+    ports:
+      - target: 14333
+        published: "14333"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /DATA/AppData/cloudflared/config
+        target: /config
+    network_mode: bridge
+    privileged: false

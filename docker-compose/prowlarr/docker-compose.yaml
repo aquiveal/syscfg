@@ -1,0 +1,26 @@
+name: prowlarr
+services:
+  prowlarr:
+    container_name: prowlarr
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Kolkata
+    hostname: prowlarr
+    image: linuxserver/prowlarr:latest
+    ports:
+      - target: 9696
+        published: "9696"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /DATA/AppData/prowlarr/config
+        target: /config
+      - type: bind
+        source: /DATA/Backups/arr/Prowlarr
+        target: /backups
+    devices: []
+    cap_add: []
+    network_mode: bridge
+    privileged: false

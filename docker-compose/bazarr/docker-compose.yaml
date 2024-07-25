@@ -1,0 +1,29 @@
+name: bazarr
+services:
+  bazarr:
+    container_name: bazarr
+    hostname: bazarr
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Kolkata
+    image: linuxserver/bazarr:latest
+    labels:
+      icon: https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Bazarr/icon.png
+    ports:
+      - target: 6767
+        published: "6767"
+        protocol: tcp
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /DATA/Media
+        target: /media
+      - type: bind
+        source: /DATA/AppData/bazarr/config
+        target: /config
+      - type: bind
+        source: /DATA/Backups/arr/Bazarr
+        target: /backups
+    network_mode: bridge
