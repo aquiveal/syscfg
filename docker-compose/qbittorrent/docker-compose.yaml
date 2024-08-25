@@ -1,0 +1,14 @@
+version: "3"
+services:
+    qbittorrent:
+        container_name: qbittorrent
+        network_mode: container:gluetun
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - UMASK=002
+            - TZ=Etc/UTC
+        volumes:
+            - /DATA/AppData/qbittorrent/config:/config
+            - /DATA/Downloads:/downloads
+        image: ghcr.io/hotio/qbittorrent:latest

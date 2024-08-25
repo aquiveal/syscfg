@@ -1,0 +1,18 @@
+version: "3"
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    ports:
+      - 9000:9000
+      volumes:
+        - /DATA/AppData/portainer:/data
+        - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    networks:
+        macvlan:
+            ipv4_address: 192.168.3.0
+networks:
+    macvlan:
+        external: true
+        name: macvlan

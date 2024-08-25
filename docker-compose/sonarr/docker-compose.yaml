@@ -1,0 +1,32 @@
+name: sonarr
+services:
+  sonarr:
+    container_name: sonarr
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Kolkata
+    hostname: sonarr
+    image: linuxserver/sonarr:latest
+    ports:
+      - target: 8989
+        published: "8989"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /DATA/AppData/sonarr/config
+        target: /config
+      - type: bind
+        source: /DATA/Media
+        target: /media
+      - type: bind
+        source: /DATA/Backups/arr/Sonarr
+        target: /backups
+      - type: bind
+        source: /DATA/Downloads
+        target: /downloads
+    devices: []
+    cap_add: []
+    network_mode: bridge
+    privileged: false

@@ -1,0 +1,19 @@
+version: "3"
+services:
+  gluetun:
+    container_name: gluetun
+    image: qmcgaw/gluetun
+    ports:
+      - 8080:8080/tcp
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - SERVER_CITIES=New York
+      - DOT_PROVIDERS=cloudflare,google,quad9
+      - VPN_SERVICE_PROVIDER=windscribe
+      - VPN_TYPE=wireguard
+      - WIREGUARD_ADDRESSES=100.104.108.130/32
+      - WIREGUARD_PRESHARED_KEY=72cfOR7x9PEiltEOHisWNQmU5PBbs7rOB5kiKiccSYc=
+      - WIREGUARD_PRIVATE_KEY=0IDvsuVSpH5qRI95Zpa4hzbq5KwLfw6KY83oleZQpmM=
+      - TZ=Asia/Kolkata
+    restart: unless-stopped

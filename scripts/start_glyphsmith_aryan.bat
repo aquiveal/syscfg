@@ -1,0 +1,1 @@
+pythonw "c:\Users\aquiv\Repo\Glyphsmith\main.py" "C:\Users\aquiv\.fonts\Personal"

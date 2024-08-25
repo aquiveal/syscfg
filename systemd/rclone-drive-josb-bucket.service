@@ -1,0 +1,12 @@
+[Unit]
+Description=Rclone Sync Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /mnt/AppData/rclone/scripts/rclone-live-sync-drive-josb-bucket.sh
+Restart=on-failure
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
