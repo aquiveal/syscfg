@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Starting script..."
+
 # Install Nginx
 apt update
 apt install -y nginx
@@ -11,6 +13,8 @@ read -p "Enter the port number: " port
 # Generate self-signed SSL certificate and key
 openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/$domain_name.key -out /etc/ssl/certs/$domain_name.crt \
   -days 365 -nodes -subj "/C=US/ST=CA/L=San Francisco/O=Aryan Singh/CN=$domain_name"
+
+echo "SSL certificate and key generated."
 
 # Configure Nginx
 cat > /etc/nginx/sites-available/reverse-proxy.conf <<EOF
@@ -38,11 +42,17 @@ server {
 }
 EOF
 
+echo "Nginx configuration created."
+
 # Enable the site and reload Nginx
 ln -s /etc/nginx/sites-available/reverse-proxy.conf /etc/nginx/sites-enabled/
 systemctl enable nginx
 systemctl restart nginx
 
+echo "Nginx reloaded."
+
 # Display success message
 echo "Reverse proxy configured successfully!"
 echo "Access your service at https://$domain_name"
+
+echo "Reached the end of the script."
