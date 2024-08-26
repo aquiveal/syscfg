@@ -16,6 +16,14 @@ apt install -y nginx || { echo "Failed to install Nginx" >&2; exit 1; }
 read -p "Enter the TLD domain name (e.g., example.com): " domain_name
 read -p "Enter the port number: " port
 
+# Clean up old configurations
+rm -f /etc/nginx/sites-available/reverse-proxy.conf
+rm -f /etc/nginx/sites-enabled/reverse-proxy.conf
+rm -f /etc/ssl/certs/$domain_name.crt
+rm -f /etc/ssl/private/$domain_name.key
+rm -f /etc/ssl/certs/$domain_name.van-ayu.ts.net.crt
+rm -f /etc/ssl/private/$domain_name.van-ayu.ts.net.key
+
 # Generate self-signed SSL certificate and key
 openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/$domain_name.key -out /etc/ssl/certs/$domain_name.crt \
   -days 365 -nodes -subj "/C=US/ST=CA/L=San Francisco/O=Aryan Singh/CN=$domain_name" || { echo "Failed to generate SSL certificate" >&2; exit 1; }
@@ -38,6 +46,17 @@ echo "Tailscale certificate and key generated."
 # Configure Nginx
 cat > /etc/nginx/sites-available/reverse-proxy.conf <<EOF
 server {
+    listen 80;
+    listen [::]:80;
+    server_name $domain_name www.$domain_name;
+
+    # Redirect HTTP to HTTPS for the main domain
+    if (\$scheme != "https") {
+        rewrite ^(.*)$ https://\$host\$1 permanent;
+    }
+}
+
+server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
 
@@ -58,8 +77,14 @@ server {
         proxy_pass http://localhost:$port;
         proxy_redirect off;
     }
+}
 
-    # Redirect HTTP to HTTPS for the main domain
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $tailscale_domain;
+
+    # Redirect HTTP to HTTPS for the Tailscale domain
     if (\$scheme != "https") {
         rewrite ^(.*)$ https://\$host\$1 permanent;
     }
@@ -86,17 +111,14 @@ server {
         proxy_pass http://localhost:$port;
         proxy_redirect off;
     }
-
-    # Redirect HTTP to HTTPS for the Tailscale domain
-    if (\$scheme != "https") {
-        rewrite ^(.*)$ https://\$host\$1 permanent;
-    }
 }
 EOF
 
 echo "Nginx configuration created."
 
 # Enable the site and reload Nginx
+# Use `rm` first to remove any existing symlink
+rm -f /etc/nginx/sites-enabled/reverse-proxy.conf
 ln -s /etc/nginx/sites-available/reverse-proxy.conf /etc/nginx/sites-enabled/ || { echo "Failed to create symlink" >&2; exit 1; }
 systemctl enable nginx || { echo "Failed to enable Nginx" >&2; exit 1; }
 systemctl restart nginx || { echo "Failed to restart Nginx" >&2; exit 1; }
