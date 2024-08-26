@@ -8,13 +8,23 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+# Get hostname and ask about using it as domain
+hostname=$(hostname -f)
+read -p "Use hostname '$hostname' as domain name? (y/n): " use_hostname
+use_hostname=${use_hostname,,} # Convert to lowercase
+
+if [[ "$use_hostname" == "y" ]]; then
+  domain_name="$hostname"
+else
+  read -p "Enter the TLD domain name (e.g., example.com): " domain_name
+fi
+
 # Install Nginx
 apt update || { echo "Failed to update package list" >&2; exit 1; }
 apt install -y nginx || { echo "Failed to install Nginx" >&2; exit 1; }
 
-# Get domain name and port from user
-read -p "Enter the TLD domain name (e.g., example.com): " domain_name
-read -p "Enter the port number: " port
+# Set default port
+port=8443
 
 # Clean up old configurations
 rm -f /etc/nginx/sites-available/reverse-proxy.conf
@@ -30,8 +40,8 @@ openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/$domain_name.key -ou
 
 echo "SSL certificate and key generated."
 
-# Generate dhparam.pem
-openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048 || { echo "Failed to generate dhparam.pem" >&2; exit 1; }
+# Generate dhparam.pem (without outputting the message)
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048 > /dev/null 2>&1 || { echo "Failed to generate dhparam.pem" >&2; exit 1; }
 
 echo "dhparam.pem generated."
 
