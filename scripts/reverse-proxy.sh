@@ -9,7 +9,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # Get hostname and ask about using it as domain
-hostname=$(hostname -f)
+hostname=$(hostname)
 read -p "Use hostname '$hostname' as domain name? (y/n): " use_hostname
 use_hostname=${use_hostname,,} # Convert to lowercase
 
