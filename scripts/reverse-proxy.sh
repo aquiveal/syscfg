@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Install Nginx
+apt update
+apt install -y nginx
+
 # Get domain name and port from user
 read -p "Enter the TLD domain name (e.g., example.com): " domain_name
 read -p "Enter the port number: " port
