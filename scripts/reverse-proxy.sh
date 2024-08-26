@@ -27,6 +27,14 @@ openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048 || { echo "Failed to genera
 
 echo "dhparam.pem generated."
 
+# Construct tailscale domain
+tailscale_domain="$domain_name.van-ayu.ts.net"
+
+# Get Tailscale certificate and key
+tailscale cert --cert-file /etc/ssl/certs/$tailscale_domain.crt --key-file /etc/ssl/private/$tailscale_domain.key "$tailscale_domain" || { echo "Failed to get Tailscale certificate" >&2; exit 1; }
+
+echo "Tailscale certificate and key generated."
+
 # Configure Nginx
 cat > /etc/nginx/sites-available/reverse-proxy.conf <<EOF
 server {
@@ -50,6 +58,39 @@ server {
         proxy_pass http://localhost:$port;
         proxy_redirect off;
     }
+
+    # Redirect HTTP to HTTPS for the main domain
+    if (\$scheme != "https") {
+        rewrite ^(.*)$ https://\$host\$1 permanent;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name $tailscale_domain;
+
+    ssl_certificate /etc/ssl/certs/$tailscale_domain.crt;
+    ssl_certificate_key /etc/ssl/private/$tailscale_domain.key;
+    ssl_session_timeout 1d;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:DES-CBC3-SHA';
+    ssl_prefer_server_ciphers on;
+    ssl_dhparam /etc/ssl/certs/dhparam.pem;
+
+    location / {
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_pass http://localhost:$port;
+        proxy_redirect off;
+    }
+
+    # Redirect HTTP to HTTPS for the Tailscale domain
+    if (\$scheme != "https") {
+        rewrite ^(.*)$ https://\$host\$1 permanent;
+    }
 }
 EOF
 
@@ -65,5 +106,6 @@ echo "Nginx reloaded."
 # Display success message
 echo "Reverse proxy configured successfully!"
 echo "Access your service at https://$domain_name"
+echo "Access your service at https://$tailscale_domain"
 
 echo "Reached the end of the script."
