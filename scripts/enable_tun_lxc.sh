@@ -13,7 +13,7 @@ if [ ! -f "$config_file" ]; then
 fi
 
 # Check if the lines are already present in the config file
-if grep -qE '^# lxc.cgroup.devices.allow: c 10:200 rwm$' "$config_file" && grep -qE '^# lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file$' "$config_file"; then
+if grep -qE '^lxc.cgroup.devices.allow: c 10:200 rwm$' "$config_file" && grep -qE '^lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file$' "$config_file"; then
   echo "Lines already exist in '$config_file'. Skipping."
 else
   # Append the lines to the configuration file
