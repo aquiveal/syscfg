@@ -19,6 +19,14 @@ else
   read -p "Enter the TLD domain name (e.g., example.com): " domain_name
 fi
 
+# Install Tailscale
+echo "Installing Tailscale..."
+curl -fsSL https://tailscale.com/install.sh | sh
+
+# Start Tailscale and wait for setup
+echo "Starting Tailscale..."
+tailscale up
+
 # Install Nginx
 apt update || { echo "Failed to update package list" >&2; exit 1; }
 apt install -y nginx || { echo "Failed to install Nginx" >&2; exit 1; }
@@ -49,6 +57,7 @@ echo "dhparam.pem generated."
 tailscale_domain="$domain_name.van-ayu.ts.net"
 
 # Get Tailscale certificate and key
+echo "Generating Tailscale certificate and key..."
 tailscale cert --cert-file /etc/ssl/certs/$tailscale_domain.crt --key-file /etc/ssl/private/$tailscale_domain.key "$tailscale_domain" || { echo "Failed to get Tailscale certificate" >&2; exit 1; }
 
 echo "Tailscale certificate and key generated."
