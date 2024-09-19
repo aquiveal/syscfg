@@ -8,6 +8,19 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+# Check if Tailscale is installed
+if ! command -v tailscale &> /dev/null; then
+  echo "Tailscale is not installed. Installing..."
+  curl -fsSL https://tailscale.com/install.sh | sh
+fi
+
+# Check if Nginx is installed
+if ! command -v nginx &> /dev/null; then
+  echo "Nginx is not installed. Installing..."
+  apt update || { echo "Failed to update package list" >&2; exit 1; }
+  apt install -y nginx || { echo "Failed to install Nginx" >&2; exit 1; }
+fi
+
 # Get hostname and ask about using it as domain
 hostname=$(hostname)
 read -p "Use hostname '$hostname' as domain name? (y/n): " use_hostname
@@ -19,9 +32,9 @@ else
   read -p "Enter the TLD domain name (e.g., example.com): " domain_name
 fi
 
-# Install Nginx
-apt update || { echo "Failed to update package list" >&2; exit 1; }
-apt install -y nginx || { echo "Failed to install Nginx" >&2; exit 1; }
+# Start Tailscale and wait for setup
+echo "Starting Tailscale..."
+tailscale up
 
 # Set default port
 port=8443
@@ -49,6 +62,7 @@ echo "dhparam.pem generated."
 tailscale_domain="$domain_name.van-ayu.ts.net"
 
 # Get Tailscale certificate and key
+echo "Generating Tailscale certificate and key..."
 tailscale cert --cert-file /etc/ssl/certs/$tailscale_domain.crt --key-file /etc/ssl/private/$tailscale_domain.key "$tailscale_domain" || { echo "Failed to get Tailscale certificate" >&2; exit 1; }
 
 echo "Tailscale certificate and key generated."
@@ -81,11 +95,12 @@ server {
     ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
     location / {
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_pass http://localhost:$port;
-        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
     }
 }
 
@@ -115,11 +130,12 @@ server {
     ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
     location / {
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_pass http://localhost:$port;
-        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
     }
 }
 EOF
