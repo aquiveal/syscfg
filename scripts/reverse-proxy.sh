@@ -94,7 +94,7 @@ server {
     ssl_prefer_server_ciphers on;
     ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
-    client_max_body_size 1024M;  # Set max upload size to 1GB
+    client_max_body_size 100M;  # Set max upload size to 1GB
 
     location / {
         proxy_pass http://localhost:$port;
@@ -131,7 +131,7 @@ server {
     ssl_prefer_server_ciphers on;
     ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
-    client_max_body_size 1024M;  # Set max upload size to 1GB
+    client_max_body_size 100M;  # Set max upload size to 1GB
 
     location / {
         proxy_pass http://localhost:$port;
