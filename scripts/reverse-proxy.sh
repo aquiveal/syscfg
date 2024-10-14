@@ -32,6 +32,10 @@ else
   read -p "Enter the TLD domain name (e.g., example.com): " domain_name
 fi
 
+# Ask for upload limit (default 1MB)
+read -p "Enter the upload limit (e.g., 1M for 1MB, 10M for 10MB, default is 1M): " upload_limit
+upload_limit=${upload_limit:-1M} # Set default value if user does not provide one
+
 # Start Tailscale and wait for setup
 echo "Starting Tailscale..."
 tailscale up
@@ -94,7 +98,7 @@ server {
     ssl_prefer_server_ciphers on;
     ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
-    client_max_body_size 100M;  # Set max upload size to 1GB
+    client_max_body_size $upload_limit;  # Set max upload size
 
     location / {
         proxy_pass http://localhost:$port;
@@ -131,7 +135,7 @@ server {
     ssl_prefer_server_ciphers on;
     ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
-    client_max_body_size 100M;  # Set max upload size to 1GB
+    client_max_body_size $upload_limit;  # Set max upload size
 
     location / {
         proxy_pass http://localhost:$port;
